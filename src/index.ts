@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { createMcpServer, startMcpServer } from './mcp/server.ts';
 import { OtlpReceiver } from './receiver/server.ts';
 import { TraceStore } from './store/trace-store.ts';
