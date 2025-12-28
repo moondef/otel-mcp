@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, expect, it } from 'bun:test';
 import { parseOtlpRequest } from '../receiver/otlp.ts';
 
 describe('OTLP Parser', () => {
@@ -7,9 +7,7 @@ describe('OTLP Parser', () => {
       resourceSpans: [
         {
           resource: {
-            attributes: [
-              { key: 'service.name', value: { stringValue: 'my-service' } },
-            ],
+            attributes: [{ key: 'service.name', value: { stringValue: 'my-service' } }],
           },
           scopeSpans: [
             {

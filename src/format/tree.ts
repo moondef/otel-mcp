@@ -7,10 +7,17 @@ interface SpanNode {
 }
 
 const PRIORITY_ATTRIBUTES = [
-  'http.method', 'http.url', 'http.status_code', 'http.route',
-  'db.system', 'db.statement', 'db.operation',
-  'exception.type', 'exception.message',
-  'rpc.method', 'rpc.service',
+  'http.method',
+  'http.url',
+  'http.status_code',
+  'http.route',
+  'db.system',
+  'db.statement',
+  'db.operation',
+  'exception.type',
+  'exception.message',
+  'rpc.method',
+  'rpc.service',
 ];
 
 const SKIP_PREFIXES = ['telemetry.', 'process.', 'host.', 'os.'];
@@ -18,7 +25,7 @@ const SKIP_PREFIXES = ['telemetry.', 'process.', 'host.', 'os.'];
 export function formatSpanTree(spans: Span[], showAttributes: boolean): string {
   if (spans.length === 0) return 'No spans';
 
-  const baseTime = Math.min(...spans.map(s => s.startTime));
+  const baseTime = Math.min(...spans.map((s) => s.startTime));
   const tree = buildTree(spans);
   const lines: string[] = [];
 
@@ -63,7 +70,7 @@ function formatNode(
   isLast: boolean,
   baseTime: number,
   showAttributes: boolean,
-  lines: string[]
+  lines: string[],
 ): void {
   const { span } = node;
   const timeRange = formatTimeRange(span.startTime, span.endTime, baseTime);
@@ -76,9 +83,8 @@ function formatNode(
     const attrs = getDisplayAttributes(span);
     const attrPrefix = prefix + (prefix === '' ? '' : isLast ? '    ' : '│   ');
     for (const [key, value] of attrs) {
-      const displayValue = typeof value === 'string' && value.length > 100
-        ? value.slice(0, 97) + '...'
-        : value;
+      const displayValue =
+        typeof value === 'string' && value.length > 100 ? `${value.slice(0, 97)}...` : value;
       lines.push(`${attrPrefix}    ${key}: ${displayValue}`);
     }
   }
@@ -105,7 +111,7 @@ function getDisplayAttributes(span: Span): Array<[string, string | number | bool
   let otherCount = 0;
   for (const [key, value] of Object.entries(span.attributes)) {
     if (seen.has(key)) continue;
-    if (SKIP_PREFIXES.some(p => key.startsWith(p))) continue;
+    if (SKIP_PREFIXES.some((p) => key.startsWith(p))) continue;
     if (otherCount >= 5) break;
     result.push([key, value]);
     otherCount++;

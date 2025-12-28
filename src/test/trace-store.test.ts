@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
 import { TraceStore } from '../store/trace-store.ts';
 import type { Span } from '../store/types.ts';
 

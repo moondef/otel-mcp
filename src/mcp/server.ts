@@ -2,15 +2,15 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import type { TraceStore } from '../store/trace-store.ts';
-import { listTraces } from './tools/list-traces.ts';
-import { getTrace } from './tools/get-trace.ts';
-import { querySpans } from './tools/query-spans.ts';
 import { getSummary } from './tools/get-summary.ts';
+import { getTrace } from './tools/get-trace.ts';
+import { listTraces } from './tools/list-traces.ts';
+import { querySpans } from './tools/query-spans.ts';
 
 export function createMcpServer(store: TraceStore): McpServer {
   const server = new McpServer(
     { name: 'otel-mcp', version: '0.1.0' },
-    { capabilities: { tools: {} } }
+    { capabilities: { tools: {} } },
   );
 
   server.tool(
@@ -20,13 +20,16 @@ export function createMcpServer(store: TraceStore): McpServer {
       service: z.string().optional().describe('Filter by service name'),
       has_errors: z.boolean().optional().describe('Only traces with errors'),
       min_duration_ms: z.number().optional().describe('Minimum duration in milliseconds'),
-      since_minutes: z.number().optional().describe('Only traces from last N minutes (default: 30)'),
+      since_minutes: z
+        .number()
+        .optional()
+        .describe('Only traces from last N minutes (default: 30)'),
       limit: z.number().optional().describe('Max results (default: 20, max: 100)'),
     },
     async (params) => {
       const result = listTraces(store, params);
       return { content: [{ type: 'text', text: result }] };
-    }
+    },
   );
 
   server.tool(
@@ -39,7 +42,7 @@ export function createMcpServer(store: TraceStore): McpServer {
     async (params) => {
       const result = getTrace(store, params);
       return { content: [{ type: 'text', text: result }] };
-    }
+    },
   );
 
   server.tool(
@@ -57,18 +60,13 @@ export function createMcpServer(store: TraceStore): McpServer {
     async (params) => {
       const result = querySpans(store, params);
       return { content: [{ type: 'text', text: result }] };
-    }
+    },
   );
 
-  server.tool(
-    'get_summary',
-    'Get a summary of stored traces and services',
-    {},
-    async () => {
-      const result = getSummary(store);
-      return { content: [{ type: 'text', text: result }] };
-    }
-  );
+  server.tool('get_summary', 'Get a summary of stored traces and services', {}, async () => {
+    const result = getSummary(store);
+    return { content: [{ type: 'text', text: result }] };
+  });
 
   return server;
 }

@@ -1,6 +1,6 @@
-import type { TraceStore } from '../../store/trace-store.ts';
 import { formatDuration } from '../../format/duration.ts';
 import { formatTable, truncate } from '../../format/table.ts';
+import type { TraceStore } from '../../store/trace-store.ts';
 
 export interface QuerySpansParams {
   name?: string;
@@ -34,9 +34,7 @@ export function querySpans(store: TraceStore, params: QuerySpansParams): string 
   if (params.has_error) filters.push('has_error=true');
   if (params.attribute) filters.push(`attribute="${params.attribute}"`);
 
-  const header = filters.length > 0
-    ? `Spans matching: ${filters.join(', ')}`
-    : 'All spans';
+  const header = filters.length > 0 ? `Spans matching: ${filters.join(', ')}` : 'All spans';
 
   const columns = [
     { header: 'SPAN NAME', width: 32 },
@@ -45,7 +43,7 @@ export function querySpans(store: TraceStore, params: QuerySpansParams): string 
     { header: 'TRACE ID', width: 16 },
   ];
 
-  const rows = result.spans.map(span => [
+  const rows = result.spans.map((span) => [
     truncate(span.name, 32),
     span.serviceName,
     formatDuration(span.duration),

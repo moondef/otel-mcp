@@ -1,6 +1,6 @@
-import type { TraceStore } from '../../store/trace-store.ts';
 import { formatMinutesRange } from '../../format/duration.ts';
 import { truncate } from '../../format/table.ts';
+import type { TraceStore } from '../../store/trace-store.ts';
 
 export function getSummary(store: TraceStore): string {
   const summary = store.getSummary();
@@ -26,7 +26,9 @@ export function getSummary(store: TraceStore): string {
 
   for (const [service, stats] of summary.services) {
     const errorPart = stats.errorCount > 0 ? `  ${stats.errorCount} errors` : '';
-    lines.push(`  ${service.padEnd(16)} ${String(stats.traceCount).padStart(4)} traces  ${String(stats.spanCount).padStart(5)} spans${errorPart}`);
+    lines.push(
+      `  ${service.padEnd(16)} ${String(stats.traceCount).padStart(4)} traces  ${String(stats.spanCount).padStart(5)} spans${errorPart}`,
+    );
   }
 
   if (summary.recentErrors.length > 0) {

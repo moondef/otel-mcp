@@ -122,11 +122,11 @@ export class TraceStore {
     const spans = this.getSpansForTrace(traceId);
     if (spans.length === 0) return null;
 
-    const rootSpan = spans.find(s => !s.parentSpanId) ?? null;
-    const services = [...new Set(spans.map(s => s.serviceName))];
-    const startTime = Math.min(...spans.map(s => s.startTime));
-    const endTime = Math.max(...spans.map(s => s.endTime));
-    const errorCount = spans.filter(s => s.status === 'error').length;
+    const rootSpan = spans.find((s) => !s.parentSpanId) ?? null;
+    const services = [...new Set(spans.map((s) => s.serviceName))];
+    const startTime = Math.min(...spans.map((s) => s.startTime));
+    const endTime = Math.max(...spans.map((s) => s.endTime));
+    const errorCount = spans.filter((s) => s.status === 'error').length;
 
     return {
       traceId,
@@ -240,8 +240,12 @@ export class TraceStore {
     services: Map<string, { traceCount: number; spanCount: number; errorCount: number }>;
     recentErrors: Array<{ traceId: string; service: string; message: string }>;
   } {
-    const services = new Map<string, { traceCount: number; spanCount: number; errorCount: number }>();
-    const recentErrors: Array<{ traceId: string; service: string; message: string; time: number }> = [];
+    const services = new Map<
+      string,
+      { traceCount: number; spanCount: number; errorCount: number }
+    >();
+    const recentErrors: Array<{ traceId: string; service: string; message: string; time: number }> =
+      [];
 
     let oldest: number | null = null;
     let newest: number | null = null;
@@ -260,7 +264,8 @@ export class TraceStore {
         recentErrors.push({
           traceId: span.traceId,
           service: span.serviceName,
-          message: span.statusMessage || span.attributes['exception.message'] as string || span.name,
+          message:
+            span.statusMessage || (span.attributes['exception.message'] as string) || span.name,
           time: span.startTime,
         });
       }
@@ -281,7 +286,7 @@ export class TraceStore {
       oldestTimestamp: oldest,
       newestTimestamp: newest,
       services,
-      recentErrors: recentErrors.slice(0, 5).map(e => ({
+      recentErrors: recentErrors.slice(0, 5).map((e) => ({
         traceId: e.traceId,
         service: e.service,
         message: e.message,

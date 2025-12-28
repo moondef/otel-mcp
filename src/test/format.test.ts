@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'bun:test';
-import { formatDuration, formatTimeRange, formatRelativeTime } from '../format/duration.ts';
+import { describe, expect, it } from 'bun:test';
+import { formatDuration, formatRelativeTime, formatTimeRange } from '../format/duration.ts';
 import { formatTable, truncate } from '../format/table.ts';
 import { formatSpanTree } from '../format/tree.ts';
 import type { Span } from '../store/types.ts';

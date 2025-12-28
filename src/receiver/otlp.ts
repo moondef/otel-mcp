@@ -66,7 +66,7 @@ function parseOtlpValue(value: OtlpValue): string | number | boolean {
   if (value.doubleValue !== undefined) return value.doubleValue;
   if (value.boolValue !== undefined) return value.boolValue;
   if (value.arrayValue !== undefined) {
-    return value.arrayValue.values.map(v => parseOtlpValue(v)).join(', ');
+    return value.arrayValue.values.map((v) => parseOtlpValue(v)).join(', ');
   }
   return '';
 }

@@ -1,6 +1,6 @@
-import type { TraceStore } from '../../store/trace-store.ts';
 import { formatDuration } from '../../format/duration.ts';
 import { formatTable, truncate } from '../../format/table.ts';
+import type { TraceStore } from '../../store/trace-store.ts';
 
 export interface ListTracesParams {
   service?: string;
@@ -35,7 +35,7 @@ export function listTraces(store: TraceStore, params: ListTracesParams): string 
     { header: 'ROOT', width: 24 },
   ];
 
-  const rows = traces.map(trace => [
+  const rows = traces.map((trace) => [
     truncate(trace.traceId, 16),
     trace.services[0] ?? 'unknown',
     formatDuration(trace.duration),

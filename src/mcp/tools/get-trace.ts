@@ -1,6 +1,6 @@
-import type { TraceStore } from '../../store/trace-store.ts';
 import { formatDuration } from '../../format/duration.ts';
 import { formatSpanTree } from '../../format/tree.ts';
+import type { TraceStore } from '../../store/trace-store.ts';
 
 export interface GetTraceParams {
   trace_id: string;
@@ -19,7 +19,10 @@ export function getTrace(store: TraceStore, params: GetTraceParams): string {
   if (!trace) {
     const matches = store.findTracesByPrefix(traceId);
     if (matches.length > 1) {
-      const matchList = matches.slice(0, 5).map(id => `  ${id}`).join('\n');
+      const matchList = matches
+        .slice(0, 5)
+        .map((id) => `  ${id}`)
+        .join('\n');
       const more = matches.length > 5 ? `\n  ...and ${matches.length - 5} more` : '';
       return `Ambiguous trace ID prefix '${traceId}' matches:\n${matchList}${more}`;
     }

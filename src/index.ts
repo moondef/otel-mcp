@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { TraceStore } from './store/trace-store.ts';
-import { OtlpReceiver } from './receiver/server.ts';
 import { createMcpServer, startMcpServer } from './mcp/server.ts';
+import { OtlpReceiver } from './receiver/server.ts';
+import { TraceStore } from './store/trace-store.ts';
 
 interface Config {
   port: number;
@@ -13,10 +13,10 @@ interface Config {
 
 function parseArgs(): Config {
   const config: Config = {
-    port: parseInt(process.env['OTEL_MCP_PORT'] ?? '4318', 10),
-    host: process.env['OTEL_MCP_HOST'] ?? 'localhost',
-    maxTraces: parseInt(process.env['OTEL_MCP_MAX_TRACES'] ?? '1000', 10),
-    maxSpans: parseInt(process.env['OTEL_MCP_MAX_SPANS'] ?? '10000', 10),
+    port: parseInt(process.env.OTEL_MCP_PORT ?? '4318', 10),
+    host: process.env.OTEL_MCP_HOST ?? 'localhost',
+    maxTraces: parseInt(process.env.OTEL_MCP_MAX_TRACES ?? '1000', 10),
+    maxSpans: parseInt(process.env.OTEL_MCP_MAX_SPANS ?? '10000', 10),
   };
 
   const args = process.argv.slice(2);

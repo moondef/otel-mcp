@@ -1,5 +1,5 @@
 import type { TraceStore } from '../store/trace-store.ts';
-import { parseOtlpRequest, type OtlpExportRequest } from './otlp.ts';
+import { type OtlpExportRequest, parseOtlpRequest } from './otlp.ts';
 
 export interface ReceiverConfig {
   port: number;
@@ -58,7 +58,7 @@ export class OtlpReceiver {
         return new Response('Unsupported content type. Use application/json', { status: 415 });
       }
 
-      const body = await req.json() as OtlpExportRequest;
+      const body = (await req.json()) as OtlpExportRequest;
       const spans = parseOtlpRequest(body);
       this.store.addSpans(spans);
 

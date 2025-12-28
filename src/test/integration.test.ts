@@ -1,12 +1,13 @@
-import { describe, it, expect, setDefaultTimeout } from 'bun:test';
+import { describe, expect, it, setDefaultTimeout } from 'bun:test';
 
 setDefaultTimeout(30000);
-import { TraceStore } from '../store/trace-store.ts';
-import { OtlpReceiver } from '../receiver/server.ts';
-import { listTraces } from '../mcp/tools/list-traces.ts';
-import { getTrace } from '../mcp/tools/get-trace.ts';
-import { querySpans } from '../mcp/tools/query-spans.ts';
+
 import { getSummary } from '../mcp/tools/get-summary.ts';
+import { getTrace } from '../mcp/tools/get-trace.ts';
+import { listTraces } from '../mcp/tools/list-traces.ts';
+import { querySpans } from '../mcp/tools/query-spans.ts';
+import { OtlpReceiver } from '../receiver/server.ts';
+import { TraceStore } from '../store/trace-store.ts';
 
 async function waitForServer(port: number, maxRetries = 20): Promise<void> {
   for (let i = 0; i < maxRetries; i++) {
@@ -37,9 +38,7 @@ describe('Integration', () => {
         resourceSpans: [
           {
             resource: {
-              attributes: [
-                { key: 'service.name', value: { stringValue: 'test-svc' } },
-              ],
+              attributes: [{ key: 'service.name', value: { stringValue: 'test-svc' } }],
             },
             scopeSpans: [
               {
@@ -51,9 +50,7 @@ describe('Integration', () => {
                     kind: 2,
                     startTimeUnixNano: String(Date.now() * 1_000_000),
                     endTimeUnixNano: String((Date.now() + 150) * 1_000_000),
-                    attributes: [
-                      { key: 'http.method', value: { stringValue: 'GET' } },
-                    ],
+                    attributes: [{ key: 'http.method', value: { stringValue: 'GET' } }],
                     status: { code: 1 },
                   },
                 ],
