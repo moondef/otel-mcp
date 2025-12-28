@@ -1,0 +1,33 @@
+{
+  "name": "otel-mcp",
+  "version": "0.1.0",
+  "description": "OpenTelemetry collector that exposes traces to AI coding agents via MCP",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "otel-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "dev": "bun run src/index.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "opentelemetry",
+    "otel",
+    "mcp",
+    "traces",
+    "observability",
+    "ai",
+    "claude"
+  ],
+  "license": "MIT"
+}
