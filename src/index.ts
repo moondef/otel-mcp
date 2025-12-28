@@ -77,10 +77,20 @@ async function main(): Promise<void> {
     host: config.host,
   });
 
-  receiver.start();
+  await receiver.start();
   console.error(`OTLP receiver listening on ${receiver.address}/v1/traces`);
 
   const mcpServer = createMcpServer(store);
+
+  const shutdown = async () => {
+    console.error('\nShutting down...');
+    await receiver.stop();
+    process.exit(0);
+  };
+
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+
   await startMcpServer(mcpServer);
 }
 

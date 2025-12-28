@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 import { formatDuration, formatRelativeTime, formatTimeRange } from '../format/duration.ts';
 import { formatTable, truncate } from '../format/table.ts';
 import { formatSpanTree } from '../format/tree.ts';

@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import type { TraceStore } from '../store/trace-store.ts';
+import { VERSION } from '../version.ts';
 import { getSummary } from './tools/get-summary.ts';
 import { getTrace } from './tools/get-trace.ts';
 import { listTraces } from './tools/list-traces.ts';
@@ -9,7 +10,7 @@ import { querySpans } from './tools/query-spans.ts';
 
 export function createMcpServer(store: TraceStore): McpServer {
   const server = new McpServer(
-    { name: 'otel-mcp', version: '0.1.0' },
+    { name: 'otel-mcp', version: VERSION },
     { capabilities: { tools: {} } },
   );
 

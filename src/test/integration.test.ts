@@ -1,7 +1,4 @@
-import { describe, expect, it, setDefaultTimeout } from 'bun:test';
-
-setDefaultTimeout(30000);
-
+import { describe, expect, it } from 'vitest';
 import { getSummary } from '../mcp/tools/get-summary.ts';
 import { getTrace } from '../mcp/tools/get-trace.ts';
 import { listTraces } from '../mcp/tools/list-traces.ts';
@@ -9,13 +6,15 @@ import { querySpans } from '../mcp/tools/query-spans.ts';
 import { OtlpReceiver } from '../receiver/server.ts';
 import { TraceStore } from '../store/trace-store.ts';
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function waitForServer(port: number, maxRetries = 20): Promise<void> {
   for (let i = 0; i < maxRetries; i++) {
     try {
       const response = await fetch(`http://localhost:${port}/health`);
       if (response.ok) return;
     } catch {
-      await Bun.sleep(100);
+      await sleep(100);
     }
   }
   throw new Error(`Server not ready on port ${port}`);
@@ -28,7 +27,7 @@ describe('Integration', () => {
     const receiver = new OtlpReceiver(store, { port });
 
     try {
-      receiver.start();
+      await receiver.start();
       await waitForServer(port);
 
       const healthResponse = await fetch(`http://localhost:${port}/health`);

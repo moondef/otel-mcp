@@ -45,6 +45,20 @@ export interface OtlpExportRequest {
   resourceSpans?: OtlpResourceSpans[];
 }
 
+function isValidSpan(span: unknown): span is OtlpSpan {
+  if (!span || typeof span !== 'object') return false;
+
+  const s = span as Record<string, unknown>;
+
+  if (typeof s.traceId !== 'string' || s.traceId.length === 0) return false;
+  if (typeof s.spanId !== 'string' || s.spanId.length === 0) return false;
+  if (typeof s.name !== 'string') return false;
+  if (typeof s.startTimeUnixNano !== 'string') return false;
+  if (typeof s.endTimeUnixNano !== 'string') return false;
+
+  return true;
+}
+
 const SPAN_KIND_MAP: Record<number, SpanKind> = {
   0: 'unspecified',
   1: 'internal',
@@ -89,30 +103,45 @@ function getServiceName(resourceAttrs: Record<string, string | number | boolean>
   return typeof name === 'string' ? name : 'unknown';
 }
 
-export function parseOtlpRequest(request: OtlpExportRequest): Span[] {
+export function parseOtlpRequest(request: unknown): Span[] {
+  if (!request || typeof request !== 'object') {
+    return [];
+  }
+
+  const req = request as Record<string, unknown>;
+  const resourceSpans = req.resourceSpans;
+
+  if (!Array.isArray(resourceSpans)) {
+    return [];
+  }
+
   const spans: Span[] = [];
 
-  for (const resourceSpans of request.resourceSpans ?? []) {
-    const resourceAttributes = parseAttributes(resourceSpans.resource?.attributes);
+  for (const resourceSpan of resourceSpans as OtlpResourceSpans[]) {
+    const resourceAttributes = parseAttributes(resourceSpan.resource?.attributes);
     const serviceName = getServiceName(resourceAttributes);
 
-    for (const scopeSpans of resourceSpans.scopeSpans ?? []) {
-      for (const otlpSpan of scopeSpans.spans) {
-        const startTime = nanoToMs(otlpSpan.startTimeUnixNano);
-        const endTime = nanoToMs(otlpSpan.endTimeUnixNano);
+    for (const scopeSpans of resourceSpan.scopeSpans ?? []) {
+      if (!Array.isArray(scopeSpans.spans)) continue;
+
+      for (const rawSpan of scopeSpans.spans) {
+        if (!isValidSpan(rawSpan)) continue;
+
+        const startTime = nanoToMs(rawSpan.startTimeUnixNano);
+        const endTime = nanoToMs(rawSpan.endTimeUnixNano);
 
         spans.push({
-          traceId: otlpSpan.traceId,
-          spanId: otlpSpan.spanId,
-          parentSpanId: otlpSpan.parentSpanId || null,
-          name: otlpSpan.name,
-          kind: SPAN_KIND_MAP[otlpSpan.kind ?? 0] ?? 'unspecified',
+          traceId: rawSpan.traceId,
+          spanId: rawSpan.spanId,
+          parentSpanId: rawSpan.parentSpanId || null,
+          name: rawSpan.name,
+          kind: SPAN_KIND_MAP[rawSpan.kind ?? 0] ?? 'unspecified',
           startTime,
           endTime,
           duration: endTime - startTime,
-          status: STATUS_MAP[otlpSpan.status?.code ?? 0] ?? 'unset',
-          statusMessage: otlpSpan.status?.message ?? null,
-          attributes: parseAttributes(otlpSpan.attributes),
+          status: STATUS_MAP[rawSpan.status?.code ?? 0] ?? 'unset',
+          statusMessage: rawSpan.status?.message ?? null,
+          attributes: parseAttributes(rawSpan.attributes),
           serviceName,
           resourceAttributes,
         });
