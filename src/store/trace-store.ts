@@ -1,3 +1,4 @@
+import { type ParsedFilter, matchesFilter, parseFilter } from './filter-parser.ts';
 import type { Span, Trace } from './types.ts';
 
 export interface StoreConfig {
@@ -20,6 +21,7 @@ export interface SpanFilter {
   minDurationMs?: number;
   hasError?: boolean;
   attribute?: string;
+  where?: string;
   sinceMinutes?: number;
   limit?: number;
 }
@@ -205,9 +207,18 @@ export class TraceStore {
     return traces.slice(0, limit);
   }
 
-  querySpans(filter: SpanFilter = {}): { spans: Span[]; traceCount: number } {
+  querySpans(filter: SpanFilter = {}): { spans: Span[]; traceCount: number; error?: string } {
     const limit = Math.min(filter.limit ?? 50, 200);
     const sinceMs = filter.sinceMinutes ? Date.now() - filter.sinceMinutes * 60 * 1000 : 0;
+
+    let parsedFilter: ParsedFilter | null = null;
+    if (filter.where) {
+      const result = parseFilter(filter.where);
+      if ('error' in result) {
+        return { spans: [], traceCount: 0, error: result.error };
+      }
+      parsedFilter = result;
+    }
 
     const matchingSpans: Span[] = [];
     const traceIds = new Set<string>();
@@ -226,6 +237,8 @@ export class TraceStore {
         if (attrValue === undefined) continue;
         if (value !== undefined && String(attrValue) !== value) continue;
       }
+
+      if (parsedFilter && !matchesFilter(span, parsedFilter)) continue;
 
       matchingSpans.push(span);
       traceIds.add(span.traceId);

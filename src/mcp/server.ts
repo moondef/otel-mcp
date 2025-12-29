@@ -95,6 +95,12 @@ export function createMcpServer(store: TraceStore): McpServer {
           .string()
           .optional()
           .describe('Attribute filter: "key=value" or "key" (exists)'),
+        where: z
+          .string()
+          .optional()
+          .describe(
+            'Expression filter. Examples: "duration > 100", "status = error", "http.status_code >= 400", "duration > 50 AND status = error"',
+          ),
         since_minutes: z.number().optional().describe('Time filter (default: 30)'),
         limit: z.number().optional().describe('Max results (default: 50, max: 200)'),
       },

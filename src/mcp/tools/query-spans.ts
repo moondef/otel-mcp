@@ -8,6 +8,7 @@ export interface QuerySpansParams {
   min_duration_ms?: number;
   has_error?: boolean;
   attribute?: string;
+  where?: string;
   since_minutes?: number;
   limit?: number;
 }
@@ -19,9 +20,14 @@ export function querySpans(store: TraceStore, params: QuerySpansParams): string 
     minDurationMs: params.min_duration_ms,
     hasError: params.has_error,
     attribute: params.attribute,
+    where: params.where,
     sinceMinutes: params.since_minutes ?? 30,
     limit: params.limit,
   });
+
+  if (result.error) {
+    return `Filter error: ${result.error}\n\nExamples:\n  duration > 100\n  status = error\n  http.status_code >= 400\n  duration > 50 AND status = error`;
+  }
 
   if (result.spans.length === 0) {
     return 'No spans found matching criteria.';
@@ -33,6 +39,7 @@ export function querySpans(store: TraceStore, params: QuerySpansParams): string 
   if (params.min_duration_ms) filters.push(`min_duration_ms=${params.min_duration_ms}`);
   if (params.has_error) filters.push('has_error=true');
   if (params.attribute) filters.push(`attribute="${params.attribute}"`);
+  if (params.where) filters.push(`where="${params.where}"`);
 
   const header = filters.length > 0 ? `Spans matching: ${filters.join(', ')}` : 'All spans';
 
