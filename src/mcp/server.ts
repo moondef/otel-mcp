@@ -122,6 +122,28 @@ export function createMcpServer(store: TraceStore): McpServer {
     },
   );
 
+  server.registerTool(
+    'clear_traces',
+    {
+      title: 'Clear Traces',
+      description:
+        'Clear all collected traces from memory. Useful for starting fresh between test runs or debugging sessions. Returns count of cleared traces.',
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: false,
+      },
+    },
+    async () => {
+      const summary = store.getSummary();
+      const traceCount = summary.traceCount;
+      const spanCount = summary.spanCount;
+      store.clear();
+      return {
+        content: [{ type: 'text', text: `Cleared ${traceCount} traces (${spanCount} spans).` }],
+      };
+    },
+  );
+
   return server;
 }
 
