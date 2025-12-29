@@ -6,6 +6,8 @@
 
 MCP server that gives AI agents access to your application's OpenTelemetry traces.
 
+<video src="./assets/demo.mp4" controls></video>
+
 ```
 Agent calls: list_traces { has_errors: true }
 
@@ -46,9 +48,50 @@ otel-mcp removes that step by letting agents query execution data directly.
 - [How to Give AI Agents Access to Runtime Traces](https://samko.io/writings/runtime-traces-for-ai-agents/) — practical guide
 - [Why AI Development Tools Must Be Execution-Aware](https://samko.io/writings/execution-aware-ai-tools/) — the design principle
 
-## Setup
+## Architecture
 
-**1. Add to your MCP config**
+```mermaid
+flowchart LR
+    subgraph app["Your Application"]
+        OTel["OpenTelemetry SDK"]
+    end
+
+    subgraph otel-mcp
+        Receiver["OTLP Receiver\n/v1/traces"]
+        Store[("Trace Store\n(in-memory)")]
+        MCP["MCP Server\n(stdio)"]
+        HTTP["HTTP API\n/mcp/*"]
+    end
+
+    subgraph client["Client Mode"]
+        MCP2["MCP Server\n(stdio)"]
+    end
+
+    Agent["AI Agent\n(Claude, Cursor)"]
+
+    OTel -->|"OTLP/HTTP\n:4318"| Receiver
+    Receiver --> Store
+    Store --> MCP
+    Store --> HTTP
+    MCP <-->|"MCP protocol"| Agent
+    HTTP <-->|"HTTP proxy"| MCP2
+    MCP2 <-->|"MCP protocol"| Agent
+```
+
+**Primary mode**: First instance runs the OTLP receiver and MCP server. Traces are stored in memory with LRU eviction.
+
+**Client mode**: Additional instances detect the primary via health check and proxy MCP tool calls over HTTP. Multiple AI agents can share the same trace data.
+
+## Quick Start
+
+**Prerequisites**: Node.js 18+
+
+### 1. Add to your MCP client
+
+<details open>
+<summary>Cursor</summary>
+
+Go to **Cursor Settings** → **MCP** → **Add new global MCP server** and paste:
 
 ```json
 {
@@ -58,10 +101,49 @@ otel-mcp removes that step by letting agents query execution data directly.
 }
 ```
 
-**2. Point your OpenTelemetry exporter at `http://localhost:4318/v1/traces`**
+Or add to `~/.cursor/mcp.json` directly.
+</details>
 
 <details>
-<summary>Node.js example</summary>
+<summary>Claude Code</summary>
+
+```bash
+claude mcp add otel -- npx otel-mcp
+```
+</details>
+
+<details>
+<summary>Other MCP clients</summary>
+
+Add to your MCP config:
+```json
+{
+  "mcpServers": {
+    "otel": { "command": "npx", "args": ["otel-mcp"] }
+  }
+}
+```
+</details>
+
+### 2. Try it out
+
+Run the example app to generate test traces:
+
+```bash
+# Clone and run example
+git clone https://github.com/moondef/otel-mcp.git
+cd otel-mcp/examples/node-app
+npm install && npm start
+```
+
+Then ask your AI agent: *"Show me recent traces"* or *"Are there any errors?"*
+
+### 3. Instrument your app
+
+Point your OpenTelemetry exporter at `http://localhost:4318/v1/traces`:
+
+<details>
+<summary>Node.js</summary>
 
 ```typescript
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -79,7 +161,7 @@ sdk.start();
 </details>
 
 <details>
-<summary>Python example</summary>
+<summary>Python</summary>
 
 ```python
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
