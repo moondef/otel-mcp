@@ -30,7 +30,7 @@ export function listTraces(store: TraceStore, params: ListTracesParams): string 
   });
 
   if (traces.length === 0) {
-    return 'No traces found.\n\nTry adjusting filters or check that your app is sending traces to http://localhost:4318/v1/traces';
+    return 'No traces found.\n\nTry adjusting filters or check that your app is sending OTLP traces to this collector.';
   }
 
   const summary = store.getSummary();

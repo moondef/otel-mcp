@@ -11,7 +11,7 @@ export function getSummary(store: TraceStore): string {
       '',
       'No traces collected yet.',
       '',
-      'Send traces to http://localhost:4318/v1/traces',
+      'Configure your app to send OTLP traces to this collector.',
     ].join('\n');
   }
 
