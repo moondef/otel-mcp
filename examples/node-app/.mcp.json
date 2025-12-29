@@ -1,0 +1,10 @@
+{
+    "mcpServers": {
+        "otel": {
+            "command": "npx",
+            "args": [
+                "otel-mcp"
+            ]
+        }
+    }
+}
