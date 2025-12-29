@@ -1,45 +1,54 @@
 # otel-mcp
 
-Give AI coding agents visibility into your application's runtime behavior.
+MCP server that gives AI agents access to your application's OpenTelemetry traces.
 
-## Why
+```
+Agent calls: list_traces { has_errors: true }
 
-When debugging with AI agents like Claude or Cursor, you end up copy-pasting logs, errors, and stack traces into chat. The agent can't see what your app is actually doing at runtime.
+Recent Traces (2 of 847)
 
-**otel-mcp** fixes this. It collects traces from your running application and lets AI agents query them directly:
+TRACE ID          SERVICE        DURATION     SPANS  ERRORS  ROOT
+a]b7f2e9d4c8      checkout-api      2.34s        12       1  POST /checkout
+f3e1a8b2c6d9      checkout-api      1.87s         8       1  POST /checkout
 
-- *"Why is the checkout endpoint slow?"*
-- *"Show me all database queries over 100ms"*
-- *"What errors happened in the last 5 minutes?"*
-- *"Trace the request that failed"*
+Agent calls: get_trace { trace_id: "a]b7f2e9d4c8" }
+
+Trace ab7f2e9d4c8
+
+Services: checkout-api, inventory-service, postgres
+Duration: 2.34s
+Spans: 12, 1 error
+
+SPAN TREE
+----------------------------------------------------------------
+[2.34s] POST /checkout
+  [1.92s] OrderService.create
+    [1.87s] InventoryService.reserve  ← HTTP 500
+      [45ms] POST inventory-service/reserve
+    [23ms] pg.query SELECT * FROM products...
+  [412ms] PaymentService.charge
+    [401ms] stripe.charges.create
+```
+
+The agent can query traces, find errors, identify slow operations - without you copying logs into chat.
 
 ## Setup
 
-### 1. Add to your MCP client
+**1. Add to your MCP config**
 
-**Claude Code:**
 ```json
 {
   "mcpServers": {
-    "otel": {
-      "command": "npx",
-      "args": ["otel-mcp"]
-    }
+    "otel": { "command": "npx", "args": ["otel-mcp"] }
   }
 }
 ```
 
-### 2. Instrument your app
+**2. Point your OpenTelemetry exporter at `http://localhost:4318/v1/traces`**
 
-Add [OpenTelemetry](https://opentelemetry.io/) to your application and point it at `http://localhost:4318/v1/traces`.
+<details>
+<summary>Node.js example</summary>
 
-> **New to OpenTelemetry?** It's the industry standard for collecting traces, metrics, and logs from applications. A "trace" shows the journey of a request through your system - which functions ran, how long they took, and what failed. Most languages have simple setup guides:
-> [Node.js](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/) ·
-> [Python](https://opentelemetry.io/docs/languages/python/getting-started/) ·
-> [Go](https://opentelemetry.io/docs/languages/go/getting-started/) ·
-> [Java](https://opentelemetry.io/docs/languages/java/getting-started/)
-
-**Node.js:**
 ```typescript
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
@@ -51,34 +60,48 @@ const sdk = new NodeSDK({
   }),
   instrumentations: [getNodeAutoInstrumentations()],
 });
-
 sdk.start();
 ```
+</details>
 
-**Python:**
+<details>
+<summary>Python example</summary>
+
 ```python
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 exporter = OTLPSpanExporter(endpoint="http://localhost:4318/v1/traces")
 ```
+</details>
 
-Many frameworks have automatic instrumentation - see the [OpenTelemetry Registry](https://opentelemetry.io/ecosystem/registry/).
+<details>
+<summary>New to OpenTelemetry?</summary>
 
-### 3. Ask your AI agent
+OpenTelemetry is a standard for collecting traces from applications. A trace shows the path of a request through your system - which functions ran, how long each took, what failed.
 
-Once traces are flowing, just ask naturally:
+Getting started: [Node.js](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/) · [Python](https://opentelemetry.io/docs/languages/python/getting-started/) · [Go](https://opentelemetry.io/docs/languages/go/getting-started/) · [Java](https://opentelemetry.io/docs/languages/java/getting-started/)
+</details>
 
-- "Show me recent traces"
-- "What's causing the slowdown?"
-- "Find all failed requests"
-- "Show me the trace for that error"
+## Tools
+
+| Tool | Description |
+|------|-------------|
+| `list_traces` | List recent traces. Filter by `service`, `has_errors`, `min_duration_ms`, `since_minutes`. |
+| `get_trace` | Get span tree for a trace ID (prefix match supported). |
+| `query_spans` | Search spans with `where` expressions: `duration > 100`, `status = error`, `http.status_code >= 400`. |
+| `get_summary` | Service overview with trace counts and recent errors. |
+| `clear_traces` | Clear all collected traces. |
+
+## Multiple sessions
+
+Multiple MCP clients share the same traces. First instance runs the collector on port 4318, others connect to it. Filter by `service` to focus on specific apps.
 
 ## Configuration
 
-```bash
-OTEL_MCP_PORT=4318           # Receiver port (default: 4318)
-OTEL_MCP_MAX_TRACES=1000     # Max traces to keep (default: 1000)
-OTEL_MCP_MAX_SPANS=10000     # Max spans to keep (default: 10000)
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OTEL_MCP_PORT` | 4318 | Collector port |
+| `OTEL_MCP_MAX_TRACES` | 1000 | Max traces to retain |
+| `OTEL_MCP_MAX_SPANS` | 10000 | Max spans to retain |
 
 ## License
 
