@@ -1,6 +1,6 @@
 {
   "name": "otel-mcp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "OpenTelemetry collector that exposes traces to AI coding agents via MCP",
   "type": "module",
   "main": "dist/index.js",
@@ -40,19 +40,31 @@
     "node": ">=18.0.0"
   },
   "keywords": [
+    "mcp",
+    "model-context-protocol",
     "opentelemetry",
     "otel",
-    "mcp",
+    "otlp",
     "traces",
+    "tracing",
     "observability",
+    "debugging",
+    "telemetry",
     "ai",
-    "claude"
+    "llm",
+    "agent",
+    "claude",
+    "cursor"
   ],
   "license": "MIT",
   "author": "Stepan Samko <hi@samko.io>",
+  "homepage": "https://github.com/moondef/otel-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/moondef/otel-mcp/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/moondef/otel-mcp"
+    "url": "git+https://github.com/moondef/otel-mcp.git"
   },
   "packageManager": "pnpm@10.11.1+sha512.e519b9f7639869dc8d5c3c5dfef73b3f091094b0a006d7317353c72b124e80e1afd429732e28705ad6bfa1ee879c1fce46c128ccebd3192101f43dd67c667912"
 }
