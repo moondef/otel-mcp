@@ -1,4 +1,4 @@
-import { createMcpServer, startMcpServer } from './mcp/server.ts';
+import { createClientMcpServer, createPrimaryMcpServer, startMcpServer } from './mcp/server.ts';
 import { OtlpReceiver } from './receiver/server.ts';
 import { TraceStore } from './store/trace-store.ts';
 
@@ -62,9 +62,20 @@ Send OTLP traces to http://<host>:<port>/v1/traces
   return config;
 }
 
-async function main(): Promise<void> {
-  const config = parseArgs();
+async function checkExistingInstance(host: string, port: number): Promise<boolean> {
+  try {
+    const response = await fetch(`http://${host}:${port}/health`, {
+      signal: AbortSignal.timeout(1000),
+    });
+    if (!response.ok) return false;
+    const data = (await response.json()) as { service?: string };
+    return data.service === 'otel-mcp';
+  } catch {
+    return false;
+  }
+}
 
+async function runAsPrimary(config: Config): Promise<void> {
   const store = new TraceStore({
     maxTraces: config.maxTraces,
     maxSpans: config.maxSpans,
@@ -76,11 +87,14 @@ async function main(): Promise<void> {
   });
 
   await receiver.start();
-  console.error(`OTLP receiver listening on ${receiver.address}/v1/traces`);
+  console.error(`Primary mode: OTLP receiver on ${receiver.address}/v1/traces`);
 
-  const mcpServer = createMcpServer(store);
+  const mcpServer = createPrimaryMcpServer(store);
 
+  let shuttingDown = false;
   const shutdown = async () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
     console.error('\nShutting down...');
     await receiver.stop();
     process.exit(0);
@@ -88,8 +102,45 @@ async function main(): Promise<void> {
 
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
+  process.stdin.on('close', shutdown);
+  process.stdin.on('end', shutdown);
 
   await startMcpServer(mcpServer);
+}
+
+async function runAsClient(config: Config): Promise<void> {
+  const baseUrl = `http://${config.host}:${config.port}`;
+
+  console.error(`Client mode: connecting to primary at ${baseUrl}`);
+
+  const mcpServer = createClientMcpServer(baseUrl);
+
+  let shuttingDown = false;
+  const shutdown = () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.error('\nShutting down...');
+    process.exit(0);
+  };
+
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+  process.stdin.on('close', shutdown);
+  process.stdin.on('end', shutdown);
+
+  await startMcpServer(mcpServer);
+}
+
+async function main(): Promise<void> {
+  const config = parseArgs();
+
+  const existingInstance = await checkExistingInstance(config.host, config.port);
+
+  if (existingInstance) {
+    await runAsClient(config);
+  } else {
+    await runAsPrimary(config);
+  }
 }
 
 main().catch((err) => {
