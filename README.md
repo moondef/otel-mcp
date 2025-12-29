@@ -1,5 +1,9 @@
 # otel-mcp
 
+[![npm version](https://img.shields.io/npm/v/otel-mcp.svg)](https://www.npmjs.com/package/otel-mcp)
+[![CI](https://github.com/moondef/otel-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/moondef/otel-mcp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 MCP server that gives AI agents access to your application's OpenTelemetry traces.
 
 ```
