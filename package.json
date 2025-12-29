@@ -1,6 +1,6 @@
 {
   "name": "otel-mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "OpenTelemetry collector that exposes traces to AI coding agents via MCP",
   "type": "module",
   "main": "dist/index.js",
