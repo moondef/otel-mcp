@@ -130,7 +130,11 @@ export function createPrimaryMcpServer(store: TraceStore): McpServer {
 export function createClientMcpServer(baseUrl: string): McpServer {
   const server = createBaseServer();
 
-  async function fetchTool(endpoint: string, params?: Record<string, unknown>): Promise<string> {
+  async function fetchTool(
+    endpoint: string,
+    params?: object,
+    method: 'GET' | 'POST' = 'GET',
+  ): Promise<string> {
     const url = new URL(endpoint, baseUrl);
     if (params) {
       for (const [key, value] of Object.entries(params)) {
@@ -139,31 +143,30 @@ export function createClientMcpServer(baseUrl: string): McpServer {
         }
       }
     }
-    const response = await fetch(url);
-    if (!response.ok) {
-      return `Error: ${response.status} ${response.statusText}`;
+    try {
+      const response = await fetch(url, { method });
+      if (!response.ok) {
+        return `Error: ${response.status} ${response.statusText}`;
+      }
+      return response.text();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      return `Error: Failed to connect to primary instance at ${baseUrl} - ${message}`;
     }
-    return response.text();
   }
 
   server.registerTool('list_traces', toolSchemas.listTraces, async (params: ListTracesParams) => {
-    const result = await fetchTool(
-      '/mcp/list_traces',
-      params as unknown as Record<string, unknown>,
-    );
+    const result = await fetchTool('/mcp/list_traces', params);
     return { content: [{ type: 'text', text: result }] };
   });
 
   server.registerTool('get_trace', toolSchemas.getTrace, async (params: GetTraceParams) => {
-    const result = await fetchTool('/mcp/get_trace', params as unknown as Record<string, unknown>);
+    const result = await fetchTool('/mcp/get_trace', params);
     return { content: [{ type: 'text', text: result }] };
   });
 
   server.registerTool('query_spans', toolSchemas.querySpans, async (params: QuerySpansParams) => {
-    const result = await fetchTool(
-      '/mcp/query_spans',
-      params as unknown as Record<string, unknown>,
-    );
+    const result = await fetchTool('/mcp/query_spans', params);
     return { content: [{ type: 'text', text: result }] };
   });
 
@@ -173,7 +176,7 @@ export function createClientMcpServer(baseUrl: string): McpServer {
   });
 
   server.registerTool('clear_traces', toolSchemas.clearTraces, async () => {
-    const result = await fetchTool('/mcp/clear_traces', { method: 'POST' });
+    const result = await fetchTool('/mcp/clear_traces', undefined, 'POST');
     return { content: [{ type: 'text', text: result }] };
   });
 

@@ -76,7 +76,7 @@ const STATUS_MAP: Record<number, SpanStatus> = {
 
 function parseOtlpValue(value: OtlpValue): string | number | boolean {
   if (value.stringValue !== undefined) return value.stringValue;
-  if (value.intValue !== undefined) return parseInt(value.intValue, 10);
+  if (value.intValue !== undefined) return Number.parseInt(value.intValue, 10);
   if (value.doubleValue !== undefined) return value.doubleValue;
   if (value.boolValue !== undefined) return value.boolValue;
   if (value.arrayValue !== undefined) {
@@ -95,7 +95,7 @@ function parseAttributes(attrs?: OtlpAttribute[]): Record<string, string | numbe
 }
 
 function nanoToMs(nano: string): number {
-  return Math.floor(parseInt(nano, 10) / 1_000_000);
+  return Math.floor(Number.parseInt(nano, 10) / 1_000_000);
 }
 
 function getServiceName(resourceAttrs: Record<string, string | number | boolean>): string {

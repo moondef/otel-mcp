@@ -11,10 +11,10 @@ interface Config {
 
 function parseArgs(): Config {
   const config: Config = {
-    port: parseInt(process.env.OTEL_MCP_PORT ?? '4318', 10),
+    port: Number.parseInt(process.env.OTEL_MCP_PORT ?? '4318', 10),
     host: process.env.OTEL_MCP_HOST ?? 'localhost',
-    maxTraces: parseInt(process.env.OTEL_MCP_MAX_TRACES ?? '1000', 10),
-    maxSpans: parseInt(process.env.OTEL_MCP_MAX_SPANS ?? '10000', 10),
+    maxTraces: Number.parseInt(process.env.OTEL_MCP_MAX_TRACES ?? '1000', 10),
+    maxSpans: Number.parseInt(process.env.OTEL_MCP_MAX_SPANS ?? '10000', 10),
   };
 
   const args = process.argv.slice(2);
@@ -23,16 +23,16 @@ function parseArgs(): Config {
     const next = args[i + 1];
 
     if ((arg === '--port' || arg === '-p') && next) {
-      config.port = parseInt(next, 10);
+      config.port = Number.parseInt(next, 10);
       i++;
     } else if ((arg === '--host' || arg === '-h') && next) {
       config.host = next;
       i++;
     } else if (arg === '--max-traces' && next) {
-      config.maxTraces = parseInt(next, 10);
+      config.maxTraces = Number.parseInt(next, 10);
       i++;
     } else if (arg === '--max-spans' && next) {
-      config.maxSpans = parseInt(next, 10);
+      config.maxSpans = Number.parseInt(next, 10);
       i++;
     } else if (arg === '--help') {
       console.log(`

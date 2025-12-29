@@ -77,7 +77,7 @@ export class TraceStore {
 
   private findOldestTrace(): string | null {
     let oldestId: string | null = null;
-    let oldestTime = Infinity;
+    let oldestTime = Number.POSITIVE_INFINITY;
 
     for (const [traceId, timestamp] of this.traceTimestamps) {
       if (timestamp < oldestTime) {
