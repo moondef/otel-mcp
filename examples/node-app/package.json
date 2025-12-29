@@ -1,0 +1,13 @@
+{
+  "name": "otel-mcp-example",
+  "type": "module",
+  "scripts": {
+    "start": "node --import ./instrumentation.js app.js"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.50.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.54.0",
+    "@opentelemetry/sdk-node": "^0.54.0"
+  }
+}
