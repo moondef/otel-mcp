@@ -36,6 +36,16 @@ SPAN TREE
 
 The agent can query traces, find errors, identify slow operations - without you copying logs into chat.
 
+## Why This Exists
+
+AI agents can read code, but they can't see how it executes. When debugging locally, you end up checking traces yourself and explaining what you found. That's the bottleneck.
+
+otel-mcp removes that step by letting agents query execution data directly.
+
+**Read more:**
+- [How to Give AI Agents Access to Runtime Traces](https://samko.io/writings/runtime-traces-for-ai-agents/) — practical guide
+- [Why AI Development Tools Must Be Execution-Aware](https://samko.io/writings/execution-aware-ai-tools/) — the design principle
+
 ## Setup
 
 **1. Add to your MCP config**
