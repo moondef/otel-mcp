@@ -8,10 +8,6 @@ MCP server that gives AI agents access to your application's OpenTelemetry trace
 
 
 
-https://github.com/user-attachments/assets/c6200bda-af79-42c7-9442-11c31c8cb8b5
-
-
-
 ```
 Agent calls: list_traces { has_errors: true }
 
