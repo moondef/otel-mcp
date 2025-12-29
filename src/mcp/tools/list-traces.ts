@@ -7,15 +7,25 @@ export interface ListTracesParams {
   has_errors?: boolean;
   min_duration_ms?: number;
   since_minutes?: number;
+  since?: string;
   limit?: number;
 }
 
 export function listTraces(store: TraceStore, params: ListTracesParams): string {
+  let sinceTimestamp: number | undefined;
+  if (params.since) {
+    const parsed = Date.parse(params.since);
+    if (!Number.isNaN(parsed)) {
+      sinceTimestamp = parsed;
+    }
+  }
+
   const traces = store.listTraces({
     service: params.service,
     hasErrors: params.has_errors,
     minDurationMs: params.min_duration_ms,
-    sinceMinutes: params.since_minutes ?? 30,
+    sinceMinutes: sinceTimestamp ? undefined : (params.since_minutes ?? 30),
+    sinceTimestamp,
     limit: params.limit,
   });
 

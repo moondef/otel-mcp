@@ -10,6 +10,7 @@ export interface TraceFilter {
   hasErrors?: boolean;
   minDurationMs?: number;
   sinceMinutes?: number;
+  sinceTimestamp?: number;
   limit?: number;
 }
 
@@ -172,7 +173,12 @@ export class TraceStore {
 
   listTraces(filter: TraceFilter = {}): Trace[] {
     const limit = Math.min(filter.limit ?? 20, 100);
-    const sinceMs = filter.sinceMinutes ? Date.now() - filter.sinceMinutes * 60 * 1000 : 0;
+    let sinceMs = 0;
+    if (filter.sinceTimestamp) {
+      sinceMs = filter.sinceTimestamp;
+    } else if (filter.sinceMinutes) {
+      sinceMs = Date.now() - filter.sinceMinutes * 60 * 1000;
+    }
 
     let traceIds: Set<string>;
 

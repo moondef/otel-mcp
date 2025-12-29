@@ -39,6 +39,10 @@ export function createMcpServer(store: TraceStore): McpServer {
           .number()
           .optional()
           .describe('Only traces from last N minutes (default: 30)'),
+        since: z
+          .string()
+          .optional()
+          .describe('ISO timestamp - only traces after this time (overrides since_minutes)'),
         limit: z.number().optional().describe('Max results (default: 20, max: 100)'),
       },
       annotations: {
